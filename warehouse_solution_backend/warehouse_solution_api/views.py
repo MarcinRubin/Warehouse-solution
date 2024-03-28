@@ -1,4 +1,3 @@
-
 from rest_framework.decorators import action
 from .models import Item, RequestRow, Request
 from .models import ItemGroupSelection, UnitOfMeasurementsSelection
@@ -27,6 +26,9 @@ class RequestViewSet(ListModelMixin, UpdateModelMixin, CreateModelMixin,
                      GenericViewSet):
     queryset = Request.objects.all()
     serializer_class = RequestSerializer
+    search_fields = ['id']
+    filterset_fields = ['status']
+    ordering_fields = '__all__'
 
     def get_serializer_class(self):
         if self.action == "get_ids":
@@ -66,8 +68,6 @@ class RequestViewSet(ListModelMixin, UpdateModelMixin, CreateModelMixin,
         return super().partial_update(request)
 
 
-
-
 class RequestRowViewSet(ListModelMixin, CreateModelMixin, GenericViewSet):
     queryset = RequestRow.objects.all()
     serializer_class = RequestRowSerializer
@@ -84,4 +84,3 @@ class RetrieveChoicesView(APIView):
                          "unit_of_measurement_selection":
                              UnitOfMeasurementsSelection.values},
                         status=status.HTTP_200_OK)
-

@@ -1,5 +1,6 @@
 from .models import Item
 
+
 class RequestError(Exception):
     def __init__(self, error_list):
         self.errors = error_list
