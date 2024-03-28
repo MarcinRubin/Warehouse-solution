@@ -10,25 +10,40 @@ import {
 } from "@chakra-ui/react";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 
-const GoodsTable = ({records, chosenRecord, setChosenRecord, setQueryParams, tableHead, setTableHead}) => {
-
+const GoodsTable = ({
+    records,
+    chosenRecord,
+    setChosenRecord,
+    queryParams,
+    setQueryParams,
+    tableHead,
+    setTableHead
+}) => {
+    
     const handleTableHeadState = (headItem) => {
         if (headItem.sorted === null || headItem.sorted === "asc") {
-            headItem = {...headItem, sorted: "desc", icon: <ChevronDownIcon />};
-            setQueryParams(prev => `?ordering=-${headItem.sortName}`);
+            headItem = {
+                ...headItem,
+                sorted: "desc",
+                icon: <ChevronDownIcon />,
+            };
+            const newQueryParams = {...queryParams, ordering: `-${headItem.sortName}`} 
+            setQueryParams((prev) => newQueryParams);
+            return headItem;
+        } else {
+            headItem = { ...headItem, sorted: "asc", icon: <ChevronUpIcon /> };
+            const newQueryParams = {...queryParams, ordering: `${headItem.sortName}`} 
+            setQueryParams((prev) => newQueryParams);
             return headItem;
         }
-        else{
-            headItem = {...headItem, sorted: "asc", icon: <ChevronUpIcon />};
-            setQueryParams(prev => `?ordering=${headItem.sortName}`);
-            return headItem;
-        }
-    }
-    
+    };
+
     const handleSort = (sortName) => {
-        const newTableHead = tableHead.map((item) => (
-            item.sortName === sortName ? handleTableHeadState(item) : {...item, sorted: null, icon: null}
-        ))
+        const newTableHead = tableHead.map((item) =>
+            item.sortName === sortName
+                ? handleTableHeadState(item)
+                : { ...item, sorted: null, icon: null }
+        );
         setTableHead(newTableHead);
     };
 
@@ -63,10 +78,12 @@ const GoodsTable = ({records, chosenRecord, setChosenRecord, setQueryParams, tab
                                 }
                                 cursor="pointer"
                                 onClick={() => setChosenRecord((prev) => row)}
-                                bgColor={row.id === chosenRecord.id ? "blue.100" : ""}
+                                bgColor={
+                                    row.id === chosenRecord.id ? "blue.100" : ""
+                                }
                             >
-                                {Object.values(row).map((field, idx2) => (
-                                    <Td key={idx2}>{field}</Td>
+                                {tableHead.map((field, idx2) => (
+                                    <Td key={idx2}>{row[field.sortName]}</Td>
                                 ))}
                             </Tr>
                         ))}

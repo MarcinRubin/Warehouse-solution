@@ -1,13 +1,14 @@
 import React from "react";
-import { HStack, Button, Text, Select, Flex } from "@chakra-ui/react";
+import { HStack, Button, Text, Select, Flex, Input } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
 import AddRequestModal from "./AddRequestModal";
 import { useDisclosure } from "@chakra-ui/react";
 import { client } from "../axiosClient/axiosClient";
 import { useState, useEffect } from "react";
 import { useToast } from '@chakra-ui/react'
+import useFetch from "../customHooks/useFetch";
 
-const GoodsTableEmployeeNav = ({ chosenRecord }) => {
+const GoodsTableEmployeeNav = ({ chosenRecord, queryParams, setQueryParams }) => {
     const {
         isOpen: isAddRequestOpen,
         onOpen: onAddRequestOpen,
@@ -18,6 +19,10 @@ const GoodsTableEmployeeNav = ({ chosenRecord }) => {
     const [chosenRequest, setChosenRequest] = useState("");
     const [addingMode, setAddingMode] = useState("request");
     const requestCreatedToast = useToast();
+    const [data, error, loading] = useFetch("/choices");
+    const [searchName, setSearchName] = useState("");
+    const [unitFilter, setUnitFilter] = useState("");
+    const [itemGroupFilter, setItemGroupFilter] = useState("");
 
     const fetchData = async () => {
         try {
@@ -46,7 +51,6 @@ const GoodsTableEmployeeNav = ({ chosenRecord }) => {
                 isClosable: true,
               })
         } catch (err) {
-            //console.log("Error occured");
             requestCreatedToast({
                 title: "Error occured, request cannot be update/create",
                 status: 'error',
@@ -58,11 +62,20 @@ const GoodsTableEmployeeNav = ({ chosenRecord }) => {
         fetchData();
     };
 
-    const handleOpenModal = (value) => {
-        console.log(value);    
+    const handleOpenModal = (value) => {  
         setAddingMode(prev => value);
         onAddRequestOpen();
     }
+
+    const handleSearch = () => {
+        const newQueryParams = {
+            ...queryParams,
+            search: `${searchName}`,
+            unit_of_measurement: `${unitFilter}`,
+            item_group: `${itemGroupFilter}`,
+        };
+        setQueryParams(newQueryParams);
+    };
 
     return (
         <>
@@ -88,6 +101,40 @@ const GoodsTableEmployeeNav = ({ chosenRecord }) => {
                             Order
                         </Text>
                     </Button>
+                    <HStack gap={1} ml={4}>
+                        <Input
+                            value={searchName}
+                            placeholder="search name"
+                            onChange={(e) => setSearchName(e.target.value)}
+                        />
+                        <Select
+                            placeholder="select unit"
+                            value={unitFilter}
+                            onChange={(e) => setUnitFilter(e.target.value)}
+                        >
+                            {data?.unit_of_measurement_selection.map(
+                                (item, idx) => (
+                                    <option key={idx} value={item}>
+                                        {item}
+                                    </option>
+                                )
+                            )}
+                        </Select>
+                        <Select
+                            placeholder="select group"
+                            value={itemGroupFilter}
+                            onChange={(e) => setItemGroupFilter(e.target.value)}
+                        >
+                            {data?.item_group_selection.map((item, idx) => (
+                                <option key={idx} value={item}>
+                                    {item}
+                                </option>
+                            ))}
+                        </Select>
+                        <Button onClick={handleSearch} w="200px">
+                            Search
+                        </Button>
+                    </HStack>
                 </HStack>
 
                 <HStack>

@@ -7,9 +7,19 @@ import RequestTableCoordinatorNav from "../components/RequestTableCoordinatorNav
 import { useOutletContext } from "react-router-dom";
 
 const OrderView = () => {
+    const [tableHead, setTableHead] = useState([
+        { sortName: "id", headName: "id", sorted: null, icon: null },
+        { sortName: "employee", headName: "employee name", sorted: null, icon: null },
+        { sortName: "status", headName: "status", sorted: null, icon: null },
+        { sortName: "comment", headName: "comment", sorted: null, icon: null },
+    ]);
     const [group] = useOutletContext();
     const [records, setRecords] = useState([]);
-    const [queryParams, setQueryParams] = useState("");
+    const [queryParams, setQueryParams] = useState({
+        ordering: "",
+        search: "",
+        status: ""
+    });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [chosenRecord, setChosenRecord] = useState("");
@@ -18,7 +28,8 @@ const OrderView = () => {
         setLoading(true);
         try {
             url ? url : "";
-            const response = await client.get(`/requests${url}${queryParams}`);
+            const query = `?ordering=${queryParams.ordering}&&search=${queryParams.search}&&status=${queryParams.status}`;
+            const response = await client.get(`/requests${url}${query}`);
             setRecords(response.data);
         } catch (err) {
             setError(err);
@@ -40,10 +51,14 @@ const OrderView = () => {
             mt={4}
             w="90%"
         >
-            {group === "Coordinator" ? <RequestTableCoordinatorNav
-                chosenRecord = {chosenRecord}
-                fetchData = {fetchData}
-            /> : null}
+            {group === "Coordinator" ? (
+                <RequestTableCoordinatorNav
+                    chosenRecord={chosenRecord}
+                    fetchData={fetchData}
+                    queryParams={queryParams}
+                    setQueryParams={setQueryParams}
+                />
+            ) : null}
 
             {loading ? (
                 <Spinner size="xl" />
@@ -52,6 +67,10 @@ const OrderView = () => {
                     records={records}
                     chosenRecord={chosenRecord}
                     setChosenRecord={setChosenRecord}
+                    queryParams = {queryParams}
+                    setQueryParams={setQueryParams}
+                    tableHead = {tableHead}
+                    setTableHead = {setTableHead}
                 />
             )}
         </Flex>

@@ -1,5 +1,5 @@
 import React from "react";
-import { HStack, Button, Text } from "@chakra-ui/react";
+import { HStack, Button, Text, Input, Select } from "@chakra-ui/react";
 import { AddIcon, DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import { useDisclosure } from "@chakra-ui/react";
 import AddModal from "./AddModal";
@@ -7,11 +7,14 @@ import UpdateModal from "./UpdateModal";
 import DeleteModal from "./DeleteModal";
 import useFetch from "../customHooks/useFetch";
 import { client } from "../axiosClient/axiosClient";
+import { useState } from "react";
 
 const GoodsTableCoordinatorNav = ({
     chosenRecord,
     setChosenRecord,
     fetchData,
+    queryParams,
+    setQueryParams,
 }) => {
     const {
         isOpen: isAddOpen,
@@ -29,6 +32,9 @@ const GoodsTableCoordinatorNav = ({
         onClose: onDeleteClose,
     } = useDisclosure();
     const [data, error, loading] = useFetch("/choices");
+    const [searchName, setSearchName] = useState("");
+    const [unitFilter, setUnitFilter] = useState("");
+    const [itemGroupFilter, setItemGroupFilter] = useState("");
 
     const handleAdd = async (newRecord) => {
         console.log(newRecord);
@@ -43,9 +49,12 @@ const GoodsTableCoordinatorNav = ({
     };
 
     const handleUpdate = async (updatedRecord) => {
-        updatedRecord = {...chosenRecord, ...updatedRecord};
+        updatedRecord = { ...chosenRecord, ...updatedRecord };
         try {
-            const response = await client.patch(`/items/${chosenRecord.id}/`, updatedRecord);
+            const response = await client.patch(
+                `/items/${chosenRecord.id}/`,
+                updatedRecord
+            );
         } catch (err) {
             console.log("Error occured");
         }
@@ -65,21 +74,33 @@ const GoodsTableCoordinatorNav = ({
         fetchData();
     };
 
+    const handleSearch = () => {
+        const newQueryParams = {
+            ...queryParams,
+            search: `${searchName}`,
+            unit_of_measurement: `${unitFilter}`,
+            item_group: `${itemGroupFilter}`,
+        };
+        setQueryParams(newQueryParams);
+    };
+
     if (loading) {
         return;
     }
 
     return (
         <>
-            {isAddOpen && <AddModal
-                isOpen={isAddOpen}
-                onClose={onAddClose}
-                handleAdd={handleAdd}
-                item_group_selection={data.item_group_selection}
-                unit_of_measurement_selection={
-                    data.unit_of_measurement_selection
-                }
-            />}
+            {isAddOpen && (
+                <AddModal
+                    isOpen={isAddOpen}
+                    onClose={onAddClose}
+                    handleAdd={handleAdd}
+                    item_group_selection={data.item_group_selection}
+                    unit_of_measurement_selection={
+                        data.unit_of_measurement_selection
+                    }
+                />
+            )}
 
             {isUpdateOpen && (
                 <UpdateModal
@@ -112,7 +133,42 @@ const GoodsTableCoordinatorNav = ({
                             Create
                         </Text>
                     </Button>
+                    <HStack gap={1} ml={4}>
+                        <Input
+                            value={searchName}
+                            placeholder="search name"
+                            onChange={(e) => setSearchName(e.target.value)}
+                        />
+                        <Select
+                            placeholder="select unit"
+                            value={unitFilter}
+                            onChange={(e) => setUnitFilter(e.target.value)}
+                        >
+                            {data?.unit_of_measurement_selection.map(
+                                (item, idx) => (
+                                    <option key={idx} value={item}>
+                                        {item}
+                                    </option>
+                                )
+                            )}
+                        </Select>
+                        <Select
+                            placeholder="select group"
+                            value={itemGroupFilter}
+                            onChange={(e) => setItemGroupFilter(e.target.value)}
+                        >
+                            {data?.item_group_selection.map((item, idx) => (
+                                <option key={idx} value={item}>
+                                    {item}
+                                </option>
+                            ))}
+                        </Select>
+                        <Button onClick={handleSearch} w="200px">
+                            Search
+                        </Button>
+                    </HStack>
                 </HStack>
+
                 <HStack gap={2}>
                     <Button
                         variant="solid"
