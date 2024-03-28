@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
-from warehouse_solution_backend.warehouse_solution_api.models import Item, Request, RequestRow
-from warehouse_solution_backend.warehouse_solution_api.factories import ItemFactory
+from warehouse_solution_api.models import Item, Request, RequestRow
+from warehouse_solution_api.factories import ItemFactory
 
 NUM_ITEMS = 20
 

@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class ItemGroupSelection(models.TextChoices):
@@ -18,7 +19,7 @@ class UnitOfMeasurementsSelection(models.TextChoices):
 
 
 class Item(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     item_group = models.CharField(
         max_length=100,
         choices=ItemGroupSelection.choices,
@@ -41,7 +42,7 @@ class Request(models.Model):
         APPROVED = "Approved",
         REJECTED = "Rejected"
 
-    employee_name = models.CharField(max_length=100)
+    employee = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=100, choices=StatusSelection.choices,
                               default=StatusSelection.NEW)
